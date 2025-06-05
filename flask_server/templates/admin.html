@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>도로뚫이단 관리자 - 2단계 신고 목록</title>
+</head>
+<body>
+  <h2>🛠️ 관리자 - 2단계(판단필요) 신고 목록</h2>
+  <table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>주소</th>
+        <th>위도</th>
+        <th>경도</th>
+        <th>신고시간</th>
+        <th>승인</th>
+        <th>삭제</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in reports %}
+      <tr>
+        <td>{{ r.id }}</td>
+        <td>{{ r.address }}</td>
+        <td>{{ r.lat }}</td>
+        <td>{{ r.lng }}</td>
+        <td>{{ r.timestamp }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin_approve', report_id=r.id) }}">
+            <button type="submit">승인</button>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="{{ url_for('admin_delete', report_id=r.id) }}">
+            <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7">2단계(판단필요) 신고가 없습니다.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <br>
+  <a href="{{ url_for('table') }}">← 신고 목록으로 돌아가기</a>
+</body>
+</html>

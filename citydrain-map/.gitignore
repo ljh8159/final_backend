@@ -1,0 +1,37 @@
+# Node.js
+node_modules/
+backend/node_modules/
+npm-debug.log
+
+# Build output
+build/
+dist/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Python virtual environments and packages
+venv/
+env/
+flask_server/flask/Lib/
+flask_server/flask/Lib/site-packages/
+
+# Environment files
+.env
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Large files
+*.dll
+*.h5
+*.pkl
+*.ckpt
