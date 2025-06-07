@@ -1,37 +1,23 @@
-# Node.js
-node_modules/
-backend/node_modules/
-npm-debug.log
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Build output
-build/
-dist/
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
 
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.db
-*.sqlite3
+# testing
+/coverage
 
-# Python virtual environments and packages
-venv/
-env/
-flask_server/flask/Lib/
-flask_server/flask/Lib/site-packages/
+# production
+/build
 
-# Environment files
-.env
-
-# macOS
+# misc
 .DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# VSCode
-.vscode/
-
-# Large files
-*.dll
-*.h5
-*.pkl
-*.ckpt
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

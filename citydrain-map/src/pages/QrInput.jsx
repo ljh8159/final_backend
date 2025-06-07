@@ -30,18 +30,21 @@ export default function QrInput({ onSubmit }) {
     // 좌표값이 없으면 null로 전달
     const latValue = lat ? parseFloat(lat) : null;
     const lngValue = lng ? parseFloat(lng) : null;
+    // for_userpage_type: '신고' 또는 '출동' (qrType이 report면 '신고', dispatch면 '출동')
+    const for_userpage_type = qrType === "report" ? "신고" : "출동";
     if (onSubmit) {
       onSubmit({
         qrType,
         inputValue,
         lat: latValue,
         lng: lngValue,
+        for_userpage_type, // 추가
       });
     }
     if (qrType === "report") {
-      history.push("/report/photo", { lat: latValue, lng: lngValue });
+      history.push("/report/photo", { lat: latValue, lng: lngValue, for_userpage_type });
     } else if (qrType === "dispatch") {
-      history.push("/dispatch/start", { lat: latValue, lng: lngValue });
+      history.push("/dispatch/start", { lat: latValue, lng: lngValue, for_userpage_type });
     }
   };
 

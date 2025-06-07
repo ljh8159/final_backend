@@ -162,10 +162,21 @@ function App() {
   }
 
   // DB 저장 함수
-  async function saveReport({ user_id = "guest", type, photo_filename, location, lat, lng, timestamp, ai_stage, extra }) {
+  async function saveReport({ user_id = "guest", type, photo_filename, location, lat, lng, timestamp, ai_stage, extra, dispatch_user_id, for_userpage_type, for_userpage_stage }) {
     try {
       await axios.post('http://127.0.0.1:5000/api/report', {
-        user_id, type, photo_filename, location, lat, lng, timestamp, ai_stage, extra
+        user_id,
+        type,
+        photo_filename,
+        location,
+        lat,
+        lng,
+        timestamp,
+        ai_stage,
+        extra,
+        dispatch_user_id,
+        for_userpage_type,
+        for_userpage_stage
       });
     } catch (e) {
       alert('DB 저장 실패');
@@ -173,9 +184,9 @@ function App() {
   }
 
   // 기존 신고를 출동/1단계로 업데이트
-  async function updateReportToDispatch(location) {
+  async function updateReportToDispatch(location, dispatch_user_id) {
     try {
-      await axios.post('http://127.0.0.1:5000/api/report_update', { location });
+      await axios.post('http://127.0.0.1:5000/api/report_update', { location, dispatch_user_id });
     } catch (e) {
       alert('기존 신고 업데이트 실패');
     }
@@ -188,35 +199,11 @@ function App() {
   return (
     <Router>
       <Switch>
-        {/* 회원가입 라우트 */}
-        <Route
-          path="/signup"
-          render={props =>
-            isLoggedIn ? (
-              <Redirect to="/" />
-            ) : (
-              <SignupPage {...props} />
-            )
-          }
-        />
-        {/* 로그인 라우트 */}
-        <Route
-          path="/login"
-          render={props =>
-            isLoggedIn ? (
-              <Redirect to="/" />
-            ) : (
-              <LoginPage {...props} setIsLoggedIn={setIsLoggedIn} setUserId={setUserId} />
-            )
-          }
-        />
-        {/* 첫 화면(/)에서 로그인 상태에 따라 분기 */}
         <Route
           exact
           path="/"
           render={props =>
             isLoggedIn ? (
-              // Home에 최근 3개만 전달, stats는 전체 건수
               <Home {...props} reports={homeReports} stats={stats} />
             ) : (
               <LoginPage {...props} setIsLoggedIn={setIsLoggedIn} setUserId={setUserId} />
@@ -224,17 +211,51 @@ function App() {
           }
         />
         <Route
+          path="/login"
+          render={props => (
+            <LoginPage {...props} setIsLoggedIn={setIsLoggedIn} setUserId={setUserId} />
+          )}
+        />
+        <Route
           path="/home/history"
           render={props =>
             isLoggedIn ? (
-              <HomeHistory
-                {...props}
-                reports={allHomeReports}
-              />
+              <HomeHistory {...props} reports={allHomeReports} />
             ) : (
               <Redirect to="/login" />
             )
           }
+        />
+        <Route
+          path="/user"
+          exact
+          render={props => (
+            <User
+              {...props}
+              user={{
+                name: userId,
+                point: userPoint,
+                reportCount: userStats.report_count,
+                dispatchCount: userStats.dispatch_count,
+                reports: userReports, // 최신 3개
+              }}
+              onLogout={handleLogout}
+            />
+          )}
+        />
+        <Route
+          path="/user/history"
+          render={props => (
+            <UserHistory
+              {...props}
+              reports={allUserReports}
+              userId={userId}
+            />
+          )}
+        />
+        <Route
+          path="/signup"
+          render={props => <SignupPage {...props} />}
         />
         <Route
           path="/qr_start"
@@ -290,7 +311,7 @@ function App() {
                 const filename = photoUrl.split('/').pop();
                 const timestamp = new Date().toISOString();
                 await saveReport({
-                  user_id: userId, // 수정: 로그인한 사용자로 저장
+                  user_id: userId,
                   type: "신고",
                   photo_filename: filename,
                   location,
@@ -298,7 +319,9 @@ function App() {
                   lng,
                   timestamp,
                   ai_stage: stage,
-                  extra: ""
+                  extra: "",
+                  for_userpage_type: "신고",
+                  for_userpage_stage: stage
                 });
                 if (stage === 3) {
                   props.history.push("/report/result_stage3", {
@@ -326,34 +349,6 @@ function App() {
           )}
         />
         <Route path="/reports/list" component={ReportsList} />
-        <Route
-          path="/user"
-          exact
-          render={props => (
-            <User
-              {...props}
-              user={{
-                name: userId,
-                point: userPoint,
-                reportCount: userStats.report_count,
-                dispatchCount: userStats.dispatch_count,
-                reports: userReports,
-              }}
-              onLogout={handleLogout}
-            />
-          )}
-        />
-        <Route
-          path="/user/history"
-          render={props => (
-            <UserHistory
-              {...props}
-              reports={allUserReports}
-              userId={userId}
-            />
-          )}
-        />
-        <Route path="/safekorea_iframe" component={SafekoreaIframe} />
         <Route
           path="/admin"
           render={props => (
@@ -421,7 +416,7 @@ function App() {
               {...props}
               onSuccess={async () => {
                 const location = window.__qr_location || "";
-                await updateReportToDispatch(location);
+                await updateReportToDispatch(location, userId); // dispatch_user_id 전달
                 props.history.push("/dispatch/ai_success");
               }}
               onFail={async () => {
@@ -432,7 +427,7 @@ function App() {
                 const lng = window.__qr_lng;
                 const timestamp = new Date().toISOString();
                 await saveReport({
-                  user_id: userId, // 수정: 로그인한 사용자로 저장
+                  user_id: userId,
                   type: "출동",
                   photo_filename: filename,
                   location,
@@ -440,7 +435,9 @@ function App() {
                   lng,
                   timestamp,
                   ai_stage: 4,
-                  extra: ""
+                  extra: "",
+                  for_userpage_type: "출동",
+                  for_userpage_stage: 4
                 });
                 props.history.push("/dispatch/ai_fail");
               }}
